@@ -1,0 +1,59 @@
+const crawl = require('./index');
+const { stopCrawl } = require('./index');
+const mongoose = require('mongoose');
+
+require('dotenv').config();
+
+mongoose.connect(process.env.DB_URL, { useNewUrlParser: true });
+const db = mongoose.connection;
+db.on('error', (error) => console.log(error));
+db.once('open', () => {
+  console.log('Connected to database: ' + db.db.databaseName);
+  try {
+    crawl(...urlList);
+    startServer();
+  } catch (error) {
+    console.log(error);
+  }
+
+  db.db.stats(function (err, stats) {
+    if (stats.storageSize / 1048576 > 500) {
+      stopCrawl();
+    }
+  });
+});
+
+const urlList = [
+  'https://en.wikipedia.org/wiki/Special:AllPages',
+  'https://en.wiktionary.org/wiki/Special:AllPages',
+  'https://en.wikiquote.org/wiki/Special:AllPages',
+  'https://en.wikibooks.org/wiki/Special:AllPages',
+  'https://en.wikisource.org/wiki/Special:AllPages',
+  'https://www.wikihow.com/Special:Sitemap',
+  'https://community.fandom.com/wiki/Special:AllPages',
+  'https://en.wikipedia.org/wiki/Lists_of_websites',
+  'https://en.wikipedia.org/wiki/Wikipedia:Contents/Lists',
+  'https://en.wikipedia.org/wiki/Category:Lists_of_superlatives',
+  'https://dictionary.cambridge.org/dictionary/english',
+  'https://help.imdb.com/article/imdb/general-information/imdb-site-index/GNCX7BHNSPBTFALQ#so',
+  'https://edition.cnn.com/sitemap.html',
+  'https://www.nytimes.com/sitemap',
+  'https://www.forbes.com',
+  'https://www.amazon.com',
+  'https://www.reddit.com/subreddits/a-1',
+  'https://www.reddit.com/subreddits/0-1',
+];
+
+function startServer() {
+  const express = require('express');
+  const app = express();
+  app.listen(5000, () => {
+    console.log('Listening at port 5000...');
+  })
+  app.use(express.json());
+  const webRouter = require('./routes/web');
+  app.use('/webs', webRouter);
+  app.get('/', (req, res) => {
+    res.send('Hello World!');
+  })
+}

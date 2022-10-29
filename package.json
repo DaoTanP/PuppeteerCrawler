@@ -1,0 +1,19 @@
+{
+  "name": "puppeteercrawler",
+  "version": "1.0.0",
+  "description": "web crawler bot",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DaoTanP/PuppeteerCrawler.git"
+  },
+  "author": "Tan",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/DaoTanP/PuppeteerCrawler/issues"
+  },
+  "homepage": "https://github.com/DaoTanP/PuppeteerCrawler#readme"
+}
