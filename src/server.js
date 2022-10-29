@@ -10,7 +10,7 @@ db.on('error', (error) => console.log(error));
 db.once('open', () => {
   console.log('Connected to database: ' + db.db.databaseName);
   try {
-    // crawl(...urlList);
+    crawl(...urlList);
     startServer();
   } catch (error) {
     console.log(error);
