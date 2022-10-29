@@ -1,6 +1,7 @@
 const fs = require('fs');
 const puppeteer = require('puppeteer');
 const { insertPage } = require('./models/web');
+const logger = require('./utils/logger');
 
 const linksQueue = [];
 const seenLinksQueue = [];
@@ -11,6 +12,24 @@ module.exports = crawl;
 exports.stopCrawl = stopCrawl;
 
 async function crawl(...urls) {
+  const linksQueue = [];
+
+  const pushQueue = (link) => {
+    if (seenLinksQueue.indexOf(link) != -1)
+      return;
+
+    linksQueue.push(link);
+  }
+
+  const popQueue = () => {
+    if (linksQueue.length === 0)
+      return undefined;
+
+    const link = linksQueue.shift();
+    seenLinksQueue.push(link);
+    return link;
+  }
+
   for (let url of urls) {
     pushQueue(url);
   }
@@ -24,17 +43,71 @@ async function crawl(...urls) {
   await page.setDefaultNavigationTimeout(0);
   // const page = (await browser.pages())[0];
 
-  while (!stopCrawling) {
+  while (!stopCrawling || linksQueue.length === 0) {
     let url = popQueue();
     if (url === undefined)
       break;
 
     await Promise.all([
       page.waitForNavigation({ waitUntil: 'networkidle2' }),
-      page.goto(url, { timeout: 0 }),
-      // waitTillHTMLRendered(page),
-      page.waitForSelector('body'),
+      page.goto(url, { timeout: 0, waitUntil: 'load' }),
+      // page.waitForSelector('body'),
     ]);
+
+    await waitTillHTMLRendered(page);
+
+    //remove ads
+    await page.evaluate((sel) => {
+      let elements = document.querySelectorAll(sel);
+      for (let i = 0; i < elements.length; i++) {
+        elements[i].parentNode.removeChild(elements[i]);
+      }
+    }, "iframe");
+
+    const pageUrl = page.url();
+    const title = await page.title();
+    const content = await page.$eval('*', (el) => el.innerText);
+
+    await handleData(pageUrl, title, content);
+
+    const pageUrls = await page.evaluate(() => {
+      const urlArray = Array.from(document.links).map((link) => link.href);
+      const uniqueUrlArray = [...new Set(urlArray)];
+      return uniqueUrlArray;
+    });
+
+    pageUrls.forEach((url) => pushQueue(url));
+  }
+
+  await browser.close();
+};
+
+async function crawlGlobally(...urls) {
+  for (let url of urls) {
+    pushQueue(url);
+  }
+
+  const browser = await puppeteer.launch({
+    headless: true,
+    args: ['--no-sandbox', '--disable-setuid-sandbox']
+  });
+
+  const page = await browser.newPage();
+  await page.setDefaultNavigationTimeout(0);
+  // const page = (await browser.pages())[0];
+
+  while (!stopCrawling || linksQueue.length === 0) {
+    let url = popQueue();
+    if (url === undefined)
+      break;
+
+    await Promise.all([
+      page.waitForNavigation({ waitUntil: 'networkidle2' }),
+      page.goto(url, { timeout: 0, waitUntil: 'load' }),
+      // page.waitForSelector('body'),
+    ]);
+
+    await waitTillHTMLRendered(page);
 
     //remove ads
     await page.evaluate((sel) => {
@@ -84,7 +157,7 @@ async function handleData(url, title, content) {
   }
   // fs.appendFile('./data.txt', url + '\n' + title + '\n' + content, (err) => {
   //   if (err) throw err;
-  //   console.log('Page content was appended to file!');
+  //   logger.log('Page content was appended to file!');
   // });
 
   await insertPage(url, title, content);
@@ -108,7 +181,7 @@ async function waitTillHTMLRendered(page, timeout = 30000) {
 
     let bodyHTMLSize = await page.evaluate(() => document.body.innerHTML.length);
 
-    console.log('last: ', lastHTMLSize, ' <> curr: ', currentHTMLSize, " body html size: ", bodyHTMLSize);
+    logger.log('last: ', lastHTMLSize, '\tcurrent: ', currentHTMLSize, "\tbody html size: ", bodyHTMLSize);
 
     if (lastHTMLSize != 0 && currentHTMLSize == lastHTMLSize)
       countStableSizeIterations++;
@@ -116,7 +189,7 @@ async function waitTillHTMLRendered(page, timeout = 30000) {
       countStableSizeIterations = 0; //reset the counter
 
     if (countStableSizeIterations >= minStableSizeIterations) {
-      console.log("Page rendered fully..");
+      logger.log("Page rendered fully..");
       break;
     }
 

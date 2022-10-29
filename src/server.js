@@ -1,19 +1,20 @@
-const crawl = require('./index');
-const { stopCrawl } = require('./index');
+const crawl = require('./crawler');
+const { stopCrawl } = require('./crawler');
 const mongoose = require('mongoose');
+const logger = require('./utils/logger');
 
 require('dotenv').config();
 
 mongoose.connect(process.env.DB_URL, { useNewUrlParser: true });
 const db = mongoose.connection;
-db.on('error', (error) => console.log(error));
+db.on('error', (error) => logger.log(error));
 db.once('open', () => {
-  console.log('Connected to database: ' + db.db.databaseName);
+  logger.init('Connected to database: ' + db.db.databaseName);
   try {
     crawl(...urlList);
     startServer();
   } catch (error) {
-    console.log(error);
+    logger.log(error);
   }
 
   db.db.stats(function (err, stats) {
@@ -47,14 +48,19 @@ const urlList = [
 function startServer() {
   const express = require('express');
   const app = express();
+
   const port = process.env.PORT || 3000;
+
   app.listen(port, () => {
-    console.log(`Listening at port ${port}...`);
+    logger.log(`Listening at port ${port}...`);
   })
+
   app.use(express.json());
+
   const webRouter = require('./routes/web');
   app.use('/webs', webRouter);
+
   app.get('/', (req, res) => {
-    res.send('Hello World!');
+    res.send("Hello World");
   })
 }
