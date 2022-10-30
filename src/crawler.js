@@ -5,6 +5,7 @@ const logger = require('./utils/logger');
 
 const linksQueue = [];
 const seenLinksQueue = [];
+let numberOfPagesCrawled = 0;
 
 let stopCrawling = false;
 
@@ -43,7 +44,7 @@ async function crawl(...urls) {
   await page.setDefaultNavigationTimeout(0);
   // const page = (await browser.pages())[0];
 
-  while (!stopCrawling || linksQueue.length === 0) {
+  while (!stopCrawling && linksQueue.length !== 0) {
     let url = popQueue();
     if (url === undefined)
       break;
@@ -69,6 +70,9 @@ async function crawl(...urls) {
     const content = await page.$eval('*', (el) => el.innerText);
 
     await handleData(pageUrl, title, content);
+    numberOfPagesCrawled++;
+    logger.log("Number of pages crawled: ", numberOfPagesCrawled);
+    console.log("Number of pages crawled: ", numberOfPagesCrawled);
 
     const pageUrls = await page.evaluate(() => {
       const urlArray = Array.from(document.links).map((link) => link.href);
@@ -96,7 +100,7 @@ async function crawlGlobally(...urls) {
   await page.setDefaultNavigationTimeout(0);
   // const page = (await browser.pages())[0];
 
-  while (!stopCrawling || linksQueue.length === 0) {
+  while (!stopCrawling && linksQueue.length !== 0) {
     let url = popQueue();
     if (url === undefined)
       break;
