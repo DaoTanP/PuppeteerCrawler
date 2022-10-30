@@ -64,7 +64,7 @@ async function crawl(...urls) {
     //     elements[i].parentNode.removeChild(elements[i]);
     //   }
     // }, "iframe");
-    await page.$$eval("iframe", els => els.forEach(el => el.remove()));
+    // await page.$$eval("iframe", els => els.forEach(el => el.remove()));
 
     const pageUrl = page.url();
     const title = await page.title();

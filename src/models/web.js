@@ -81,9 +81,7 @@ const insertPage = async (url, title, content) => {
   }
 }
 
-// module.exports = model;
-module.exports = {
-  getPage,
-  updatePage,
-  insertPage,
-}
+module.exports = model;
+exports.getPage = getPage;
+exports.updatePage = updatePage;
+exports.insertPage = insertPage;
