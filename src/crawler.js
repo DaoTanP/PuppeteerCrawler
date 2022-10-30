@@ -72,7 +72,6 @@ async function crawl(...urls) {
     await handleData(pageUrl, title, content);
     numberOfPagesCrawled++;
     logger.log("Number of pages crawled: ", numberOfPagesCrawled);
-    console.log("Number of pages crawled: ", numberOfPagesCrawled);
 
     const pageUrls = await page.evaluate(() => {
       const urlArray = Array.from(document.links).map((link) => link.href);

@@ -15,7 +15,7 @@ const init = (...params) => {
 const log = (...params) => {
     fs.appendFile(filePath, params.join(' ') + '\n', (err) => {
         if (err) throw err;
-        // console.log('Log was appended to file!');
+        console.log(params);
     });
 }
 
