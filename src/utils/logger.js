@@ -13,9 +13,10 @@ const init = (...params) => {
 }
 
 const log = (...params) => {
-    fs.appendFile(filePath, params.join(' ') + '\n', (err) => {
+    const msg = params.join(' ');
+    fs.appendFile(filePath, msg + '\n', (err) => {
         if (err) throw err;
-        console.log(params);
+        console.log(msg);
     });
 }
 
