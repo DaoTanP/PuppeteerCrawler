@@ -58,12 +58,13 @@ async function crawl(...urls) {
     await waitTillHTMLRendered(page);
 
     //remove ads
-    await page.evaluate((sel) => {
-      let elements = document.querySelectorAll(sel);
-      for (let i = 0; i < elements.length; i++) {
-        elements[i].parentNode.removeChild(elements[i]);
-      }
-    }, "iframe");
+    // await page.evaluate((sel) => {
+    //   let elements = document.querySelectorAll(sel);
+    //   for (let i = 0; i < elements.length; i++) {
+    //     elements[i].parentNode.removeChild(elements[i]);
+    //   }
+    // }, "iframe");
+    await page.$$eval("iframe", els => els.forEach(el => el.remove()));
 
     const pageUrl = page.url();
     const title = await page.title();

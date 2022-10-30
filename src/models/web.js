@@ -23,10 +23,9 @@ webSchema.index({
 
 const model = mongoose.model('Web', webSchema, 'web_pages');
 model.createIndexes();
-module.exports = model;
 
 const getPage = async (url, title, content) => {
-  if (!url && !title && !content)
+  if (!url || !title || !content)
     return undefined;
 
   let page = await model.findOne({ url: url, title: title, content: content });
@@ -44,7 +43,7 @@ const getPage = async (url, title, content) => {
 };
 
 const updatePage = async (url, title, content) => {
-  if (!url && !title && !content)
+  if (!url || !title || !content)
     return undefined;
 
   const oldPage = await getPage(url, title, content);
@@ -60,10 +59,10 @@ const updatePage = async (url, title, content) => {
 }
 
 const insertPage = async (url, title, content) => {
-  if (!url && !title && !content)
+  if (!url || !title || !content)
     return;
 
-  const p = updatePage(url, title, content);
+  const p = await updatePage(url, title, content);
   if (p)
     return;
 
@@ -72,6 +71,7 @@ const insertPage = async (url, title, content) => {
     title: title,
     content: content
   });
+
   try {
     const newPage = await page.save();
     logger.log('New record added: ', newPage.title);
@@ -81,6 +81,7 @@ const insertPage = async (url, title, content) => {
   }
 }
 
+// module.exports = model;
 module.exports = {
   getPage,
   updatePage,
