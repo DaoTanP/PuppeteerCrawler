@@ -11,7 +11,9 @@ db.on('error', (error) => logger.log(error));
 db.once('open', () => {
   logger.init('Connected to database: ' + db.db.databaseName);
   try {
-    crawl(...urlList);
+    crawl(...urlListWiki);
+    crawl(...urlListCommunity);
+    crawl(...urlListNews);
     startServer();
   } catch (error) {
     logger.log(error);
@@ -24,26 +26,33 @@ db.once('open', () => {
   });
 });
 
-const urlList = [
+const urlListWiki = [
   'https://en.wikipedia.org/wiki/Special:AllPages',
   'https://en.wiktionary.org/wiki/Special:AllPages',
   'https://en.wikiquote.org/wiki/Special:AllPages',
   'https://en.wikibooks.org/wiki/Special:AllPages',
   'https://en.wikisource.org/wiki/Special:AllPages',
-  'https://www.wikihow.com/Special:Sitemap',
-  'https://community.fandom.com/wiki/Special:AllPages',
   'https://en.wikipedia.org/wiki/Lists_of_websites',
   'https://en.wikipedia.org/wiki/Wikipedia:Contents/Lists',
   'https://en.wikipedia.org/wiki/Category:Lists_of_superlatives',
-  'https://dictionary.cambridge.org/dictionary/english',
+];
+
+const urlListCommunity = [
+  'https://www.wikihow.com/Special:Sitemap',
+  'https://community.fandom.com/wiki/Special:AllPages',
+  'https://www.reddit.com/subreddits/a-1',
+  'https://www.reddit.com/subreddits/0-1',
   'https://help.imdb.com/article/imdb/general-information/imdb-site-index/GNCX7BHNSPBTFALQ#so',
+  'https://myanimelist.net/about/sitemap',
+]
+
+const urlListNews = [
+  'https://dictionary.cambridge.org/dictionary/english',
   'https://edition.cnn.com/sitemap.html',
   'https://www.nytimes.com/sitemap',
   'https://www.forbes.com',
   'https://www.amazon.com',
-  'https://www.reddit.com/subreddits/a-1',
-  'https://www.reddit.com/subreddits/0-1',
-];
+]
 
 function startServer() {
   const express = require('express');
