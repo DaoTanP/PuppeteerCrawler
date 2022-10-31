@@ -14,10 +14,11 @@ const init = (...params) => {
 
 const log = (...params) => {
     const msg = params.join(' ');
-    fs.appendFile(filePath, msg + '\n', (err) => {
-        if (err) throw err;
-        console.log(msg);
-    });
+    // fs.appendFile(filePath, msg + '\n', (err) => {
+    //     if (err) throw err;
+    //     console.log(msg);
+    // });
+    console.log(msg);
 }
 
 const getLog = (callback = undefined) => {
