@@ -48,7 +48,13 @@ const urlList = [
 
 function startServer() {
   const express = require('express');
+  const cors = require('cors');
   const app = express();
+
+  app.use(cors({
+    origin: '*',
+    methods: ['GET', 'POST', 'DELETE', 'UPDATE', 'PUT', 'PATCH']
+  }));
 
   const port = process.env.PORT || 3000;
 
