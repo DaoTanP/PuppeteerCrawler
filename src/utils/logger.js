@@ -47,4 +47,5 @@ module.exports = {
     init,
     log,
     getLog,
+    readFile,
 }

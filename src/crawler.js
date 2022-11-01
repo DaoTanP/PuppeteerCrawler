@@ -3,14 +3,12 @@ const puppeteer = require('puppeteer');
 const { insertPage } = require('./models/web');
 const logger = require('./utils/logger');
 
+const linksQueueFilePath = './linksQueue.txt';
 const linksQueue = [];
 const seenLinksQueue = [];
 let numberOfPagesCrawled = 0;
 
 let stopCrawling = false;
-
-module.exports = crawl;
-exports.stopCrawl = stopCrawl;
 
 async function crawl(...urls) {
   const linksQueue = [];
@@ -87,6 +85,9 @@ async function crawl(...urls) {
 };
 
 async function crawlGlobally(...urls) {
+  const Queue = readFile(linksQueueFilePath);
+  Queue.split('\n').forEach((link) => pushQueue(link));
+
   for (let url of urls) {
     pushQueue(url);
   }
@@ -134,6 +135,8 @@ async function crawlGlobally(...urls) {
     });
 
     pageUrls.forEach((url) => pushQueue(url));
+
+    writeFile(linksQueueFilePath, ...linksQueue);
   }
 
   await browser.close();
@@ -201,3 +204,26 @@ async function waitTillHTMLRendered(page, timeout = 30000) {
     await page.waitForTimeout(checkDurationMsecs);
   }
 };
+
+function writeFile(filePath, ...content) {
+  fs.writeFileSync(filePath, content.join('\n'), (err) => {
+    if (err) throw err;
+  });
+}
+
+function readFile(filePath) {
+  // Use fs.createReadStream() method
+  // to read the file
+  reader = fs.createReadStream(filePath, {
+    flag: 'r',
+    encoding: 'UTF-8',
+  });
+
+  // Read and display the file data on console
+  reader.on('data', function (log) {
+    return log;
+  });
+}
+
+module.exports = crawlGlobally;
+exports.stopCrawl = stopCrawl;
