@@ -16,7 +16,7 @@ async function crawl(...urls) {
   const linksQueue = [];
 
   const pushQueue = (link) => {
-    if (seenLinksQueue.indexOf(link) != -1)
+    if (seenLinksQueue.indexOf(link) != -1 || !isValidUrl(link))
       return;
 
     linksQueue.push(link);
@@ -46,12 +46,6 @@ async function crawl(...urls) {
 
   while (!stopCrawling && linksQueue.length !== 0) {
     let url = popQueue();
-
-    while (!url || url === '')
-      url = popQueue();
-
-    if(!url || url === '')
-      break;
 
     await Promise.all([
       page.waitForNavigation({ waitUntil: 'networkidle2' }),
@@ -144,7 +138,7 @@ async function crawlGlobally(...urls) {
 };
 
 function pushQueue(link) {
-  if (seenLinksQueue.indexOf(link) != -1)
+  if (seenLinksQueue.indexOf(link) != -1  || !isValidUrl(link))
     return;
 
   linksQueue.push(link);
@@ -205,3 +199,13 @@ async function waitTillHTMLRendered(page, timeout = 30000) {
     await page.waitForTimeout(checkDurationMsecs);
   }
 };
+
+function isValidUrl(urlString) {
+  var urlPattern = new RegExp('^(https?:\\/\\/)?'+ // validate protocol
+  '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|'+ // validate domain name
+  '((\\d{1,3}\\.){3}\\d{1,3}))'+ // validate OR ip (v4) address
+  '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*'+ // validate port and path
+  '(\\?[;&a-z\\d%_.~+=-]*)?'+ // validate query string
+  '(\\#[-a-z\\d_]*)?$','i'); // validate fragment locator
+return !!urlPattern.test(urlString);
+}
