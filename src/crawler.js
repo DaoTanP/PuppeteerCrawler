@@ -46,7 +46,11 @@ async function crawl(...urls) {
 
   while (!stopCrawling && linksQueue.length !== 0) {
     let url = popQueue();
-    if (url === undefined)
+
+    while (!url || url === '')
+      url = popQueue();
+
+    if(!url || url === '')
       break;
 
     await Promise.all([
