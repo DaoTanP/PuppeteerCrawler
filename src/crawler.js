@@ -101,7 +101,7 @@ async function crawlGlobally(...urls) {
   page.setDefaultNavigationTimeout(0);
   // const page = (await browser.pages())[0];
 
-  while (!stopCrawling && await queueDB.getQueue().length !== 0) {
+  while (!stopCrawling) {
     let url = await queueDB.popQueue();
     if (url === undefined)
       break;

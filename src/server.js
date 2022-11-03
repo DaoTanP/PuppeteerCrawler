@@ -2,7 +2,6 @@ const crawl = require('./crawler');
 const { stopCrawl } = require('./crawler');
 const mongoose = require('mongoose');
 const logger = require('./utils/logger');
-const linksQueue = require('./models/queue');
 
 require('dotenv').config();
 
@@ -69,7 +68,6 @@ function startServer() {
   app.use('/webs', webRouter);
 
   app.get('/', async (req, res) => {
-    const queue = await linksQueue.getQueue();
-    res.json(queue);
+    res.send("Hello World!");
   })
 }
