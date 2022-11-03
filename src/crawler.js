@@ -38,7 +38,7 @@ async function crawl(...urls) {
   });
 
   const page = await browser.newPage();
-  await page.setDefaultNavigationTimeout(0);
+  page.setDefaultNavigationTimeout(0);
   // const page = (await browser.pages())[0];
 
   while (!stopCrawling && linksQueue.length !== 0) {
@@ -76,6 +76,7 @@ async function crawl(...urls) {
     });
 
     pageUrls.forEach((url) => pushQueue(url));
+    global.gc();
   }
 
   await browser.close();
@@ -95,7 +96,7 @@ async function crawlGlobally(...urls) {
   });
 
   const page = await browser.newPage();
-  await page.setDefaultNavigationTimeout(0);
+  page.setDefaultNavigationTimeout(0);
   // const page = (await browser.pages())[0];
 
   while (!stopCrawling && linksQueue.length !== 0) {
@@ -134,6 +135,7 @@ async function crawlGlobally(...urls) {
     pageUrls.forEach((url) => pushQueue(url));
 
     fileUtil.writeFile(linksQueueFilePath, ...linksQueue);
+    global.gc();
   }
 
   await browser.close();
