@@ -113,18 +113,20 @@ async function crawlGlobally(...urls) {
     await waitTillHTMLRendered(page);
 
     //remove ads
-    await page.evaluate((sel) => {
-      let elements = document.querySelectorAll(sel);
-      for (let i = 0; i < elements.length; i++) {
-        elements[i].parentNode.removeChild(elements[i]);
-      }
-    }, "iframe");
+    // await page.evaluate((sel) => {
+    //   let elements = document.querySelectorAll(sel);
+    //   for (let i = 0; i < elements.length; i++) {
+    //     elements[i].parentNode.removeChild(elements[i]);
+    //   }
+    // }, "iframe");
 
     const pageUrl = page.url();
     const title = await page.title();
     const content = await page.$eval('*', (el) => el.innerText);
 
     await handleData(pageUrl, title, content);
+    numberOfPagesCrawled++;
+    logger.log("Number of pages crawled: ", numberOfPagesCrawled);
 
     const pageUrls = await page.evaluate(() => {
       const urlArray = Array.from(document.links).map((link) => link.href);
