@@ -24,7 +24,7 @@ async function crawl(...urls) {
       return undefined;
 
     const link = linksQueue.shift();
-    seenLinksQueue.push(link);
+    // seenLinksQueue.push(link);
     return link;
   }
 
@@ -155,7 +155,7 @@ function popQueue() {
     return undefined;
 
   const link = linksQueue.shift();
-  seenLinksQueue.push(link);
+  // seenLinksQueue.push(link);
   return link;
 }
 
