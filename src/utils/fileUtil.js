@@ -7,6 +7,9 @@ function writeFile(filePath, ...content) {
 }
 
 function readFile(filePath) {
+    if (!fs.existsSync(filePath))
+        return undefined;
+
     // Use fs.createReadStream() method
     // to read the file
     reader = fs.createReadStream(filePath, {
@@ -21,11 +24,12 @@ function readFile(filePath) {
 }
 
 function deleteFile(filePath) {
-    if (fs.existsSync(filePath)) {
-        fs.unlink(filePath, function (err) {
-            if (err) throw err;
-        });
-    }
+    if (!fs.existsSync(filePath))
+        return;
+
+    fs.unlink(filePath, function (err) {
+        if (err) throw err;
+    });
 }
 
 module.exports = {
