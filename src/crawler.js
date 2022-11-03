@@ -84,7 +84,7 @@ async function crawl(...urls) {
 
 async function crawlGlobally(...urls) {
   const Queue = fileUtil.readFile(linksQueueFilePath);
-  Queue.split('\n').forEach((link) => pushQueue(link));
+  Queue.split('\n')?.forEach((link) => pushQueue(link));
 
   for (let url of urls) {
     pushQueue(url);
