@@ -2,7 +2,6 @@ const puppeteer = require('puppeteer');
 const { insertPage } = require('./models/web');
 const logger = require('./utils/logger');
 const fileUtil = require('./utils/fileUtil');
-
 const linksQueueFilePath = './linksQueue.txt';
 const linksQueue = [];
 const seenLinksQueue = [];
@@ -67,8 +66,8 @@ async function crawl(...urls) {
     const content = await page.$eval('*', (el) => el.innerText);
 
     await handleData(pageUrl, title, content);
-    // numberOfPagesCrawled++;
-    // logger.log("Number of pages crawled: ", numberOfPagesCrawled);
+    numberOfPagesCrawled++;
+    logger.log("Number of pages crawled: ", numberOfPagesCrawled);
 
     const pageUrls = await page.evaluate(() => {
       const urlArray = Array.from(document.links).map((link) => link.href);
@@ -184,9 +183,9 @@ async function waitTillHTMLRendered(page, timeout = 30000) {
     let html = await page.content();
     let currentHTMLSize = html.length;
 
-    // let bodyHTMLSize = await page.evaluate(() => document.body.innerHTML.length);
+    let bodyHTMLSize = await page.evaluate(() => document.body.innerHTML.length);
 
-    // logger.log('last: ', lastHTMLSize, '\tcurrent: ', currentHTMLSize, "\tbody html size: ", bodyHTMLSize);
+    logger.log('last: ', lastHTMLSize, '\tcurrent: ', currentHTMLSize, "\tbody html size: ", bodyHTMLSize);
 
     if (lastHTMLSize != 0 && currentHTMLSize == lastHTMLSize)
       countStableSizeIterations++;
@@ -194,7 +193,7 @@ async function waitTillHTMLRendered(page, timeout = 30000) {
       countStableSizeIterations = 0; //reset the counter
 
     if (countStableSizeIterations >= minStableSizeIterations) {
-      // logger.log("Page rendered fully..");
+      logger.log("Page rendered fully..");
       break;
     }
 

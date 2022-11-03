@@ -10,9 +10,9 @@ const init = (...params) => {
 }
 
 const log = (...params) => {
-    const msg = params.join(' ');
+    // const msg = params.join(' ');
 
-    console.log(msg);
+    // console.log(msg);
 }
 
 const getLog = (callback = undefined) => {
