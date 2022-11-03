@@ -31,7 +31,7 @@ const pushQueue = async (url) => {
 
     try {
         const newElement = await element.save();
-        logger.log(`${newElement.url} pushed into queue.`);
+        // logger.log(`${newElement.url} pushed into queue.`);
     } catch (error) {
         // logger.log(error.message);
         throw error;
