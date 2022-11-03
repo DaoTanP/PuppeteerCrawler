@@ -2,6 +2,7 @@ const puppeteer = require('puppeteer');
 const { insertPage } = require('./models/web');
 const logger = require('./utils/logger');
 const fileUtil = require('./utils/fileUtil');
+
 const linksQueueFilePath = './linksQueue.txt';
 const linksQueue = [];
 const seenLinksQueue = [];
@@ -83,8 +84,8 @@ async function crawl(...urls) {
 };
 
 async function crawlGlobally(...urls) {
-  const Queue = fileUtil.readFile(linksQueueFilePath);
-  Queue?.split('\n').forEach((link) => pushQueue(link));
+  // const Queue = fileUtil.readFile(linksQueueFilePath);
+  // Queue?.split('\n').forEach((link) => pushQueue(link));
 
   for (let url of urls) {
     pushQueue(url);
@@ -136,7 +137,7 @@ async function crawlGlobally(...urls) {
 
     pageUrls.forEach((url) => pushQueue(url));
 
-    fileUtil.writeFile(linksQueueFilePath, ...linksQueue);
+    // fileUtil.writeFile(linksQueueFilePath, ...linksQueue);
     global.gc();
   }
 
