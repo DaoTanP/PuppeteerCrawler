@@ -1,5 +1,6 @@
 const puppeteer = require('puppeteer');
 const { insertPage } = require('./models/web');
+const queueDB = require('./models/queue');
 const logger = require('./utils/logger');
 const fileUtil = require('./utils/fileUtil');
 
@@ -88,7 +89,7 @@ async function crawlGlobally(...urls) {
   // Queue?.split('\n').forEach((link) => pushQueue(link));
 
   for (let url of urls) {
-    pushQueue(url);
+    await queueDB.pushQueue(url);
   }
 
   const browser = await puppeteer.launch({
@@ -100,8 +101,8 @@ async function crawlGlobally(...urls) {
   page.setDefaultNavigationTimeout(0);
   // const page = (await browser.pages())[0];
 
-  while (!stopCrawling && linksQueue.length !== 0) {
-    let url = popQueue();
+  while (!stopCrawling && await queueDB.getQueue().length !== 0) {
+    let url = await queueDB.popQueue();
     if (url === undefined)
       break;
 
@@ -135,7 +136,8 @@ async function crawlGlobally(...urls) {
       return uniqueUrlArray;
     });
 
-    pageUrls.forEach((url) => pushQueue(url));
+    // pageUrls.forEach((url) => pushQueue(url));
+    pageUrls.forEach(async (url) => await queueDB.pushQueue(url));
 
     // fileUtil.writeFile(linksQueueFilePath, ...linksQueue);
     global.gc();
