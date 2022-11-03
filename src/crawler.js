@@ -1,7 +1,7 @@
-const fs = require('fs');
 const puppeteer = require('puppeteer');
 const { insertPage } = require('./models/web');
 const logger = require('./utils/logger');
+const fileUtil = require('./utils/fileUtil');
 
 const linksQueueFilePath = './linksQueue.txt';
 const linksQueue = [];
@@ -67,8 +67,8 @@ async function crawl(...urls) {
     const content = await page.$eval('*', (el) => el.innerText);
 
     await handleData(pageUrl, title, content);
-    numberOfPagesCrawled++;
-    logger.log("Number of pages crawled: ", numberOfPagesCrawled);
+    // numberOfPagesCrawled++;
+    // logger.log("Number of pages crawled: ", numberOfPagesCrawled);
 
     const pageUrls = await page.evaluate(() => {
       const urlArray = Array.from(document.links).map((link) => link.href);
@@ -83,7 +83,7 @@ async function crawl(...urls) {
 };
 
 async function crawlGlobally(...urls) {
-  const Queue = readFile(linksQueueFilePath);
+  const Queue = fileUtil.readFile(linksQueueFilePath);
   Queue.split('\n').forEach((link) => pushQueue(link));
 
   for (let url of urls) {
@@ -134,7 +134,7 @@ async function crawlGlobally(...urls) {
 
     pageUrls.forEach((url) => pushQueue(url));
 
-    writeFile(linksQueueFilePath, ...linksQueue);
+    fileUtil.writeFile(linksQueueFilePath, ...linksQueue);
   }
 
   await browser.close();
@@ -184,9 +184,9 @@ async function waitTillHTMLRendered(page, timeout = 30000) {
     let html = await page.content();
     let currentHTMLSize = html.length;
 
-    let bodyHTMLSize = await page.evaluate(() => document.body.innerHTML.length);
+    // let bodyHTMLSize = await page.evaluate(() => document.body.innerHTML.length);
 
-    logger.log('last: ', lastHTMLSize, '\tcurrent: ', currentHTMLSize, "\tbody html size: ", bodyHTMLSize);
+    // logger.log('last: ', lastHTMLSize, '\tcurrent: ', currentHTMLSize, "\tbody html size: ", bodyHTMLSize);
 
     if (lastHTMLSize != 0 && currentHTMLSize == lastHTMLSize)
       countStableSizeIterations++;
@@ -194,7 +194,7 @@ async function waitTillHTMLRendered(page, timeout = 30000) {
       countStableSizeIterations = 0; //reset the counter
 
     if (countStableSizeIterations >= minStableSizeIterations) {
-      logger.log("Page rendered fully..");
+      // logger.log("Page rendered fully..");
       break;
     }
 
@@ -211,26 +211,6 @@ function isValidUrl(urlString) {
     '(\\?[;&a-z\\d%_.~+=-]*)?' + // validate query string
     '(\\#[-a-z\\d_]*)?$', 'i'); // validate fragment locator
   return !!urlPattern.test(urlString);
-}
-
-function writeFile(filePath, ...content) {
-  fs.writeFileSync(filePath, content.join('\n'), (err) => {
-    if (err) throw err;
-  });
-}
-
-function readFile(filePath) {
-  // Use fs.createReadStream() method
-  // to read the file
-  reader = fs.createReadStream(filePath, {
-    flag: 'r',
-    encoding: 'UTF-8',
-  });
-
-  // Read and display the file data on console
-  reader.on('data', function (log) {
-    return log;
-  });
 }
 
 module.exports = crawlGlobally;

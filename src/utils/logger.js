@@ -1,46 +1,26 @@
 const fs = require("fs");
+const fileUtil = require("./fileUtil");
 
 const filePath = './log.txt';
 
 const init = (...params) => {
-    if (fs.existsSync(filePath)) {
-        fs.unlink(filePath, function (err) {
-            if (err) throw err;
-        });
-    }
+    fileUtil.deleteFile(filePath);
 
     log(params);
 }
 
 const log = (...params) => {
     const msg = params.join(' ');
-    // fs.appendFile(filePath, msg + '\n', (err) => {
-    //     if (err) throw err;
-    //     console.log(msg);
-    // });
+
     console.log(msg);
 }
 
 const getLog = (callback = undefined) => {
     fs.watch(filePath, (eventName, filename) => {
         // console.log('Event: ' + eventName);
-        fileContent = readFile(filePath);
+        fileContent = fileUtil.readFile(filePath);
         if (callback)
             callback(fileContent);
-    });
-}
-
-const readFile = (filePath) => {
-    // Use fs.createReadStream() method
-    // to read the file
-    reader = fs.createReadStream(filePath, {
-        flag: 'r',
-        encoding: 'UTF-8',
-    });
-
-    // Read and display the file data on console
-    reader.on('data', function (log) {
-        return log;
     });
 }
 
@@ -48,5 +28,4 @@ module.exports = {
     init,
     log,
     getLog,
-    readFile,
 }
