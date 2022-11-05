@@ -59,7 +59,7 @@ function startServer() {
 
   app.use(cors({
     origin: '*',
-    methods: ['GET', 'POST', 'DELETE', 'UPDATE', 'PUT', 'PATCH']
+    methods: ['GET', 'POST', 'DELETE', 'UPDATE', 'PUT', 'PATCH', 'OPTIONS']
   }));
 
   const port = process.env.PORT || 3000;
