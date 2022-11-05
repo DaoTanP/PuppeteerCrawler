@@ -1,6 +1,18 @@
 const mongoose = require('mongoose');
 const logger = require('../utils/logger');
 
+require('dotenv').config();
+
+const db = mongoose.createConnection(process.env.DB_URL_WEBDATA, { useNewUrlParser: true });
+
+db.on('error', (error) => {
+  logger.log("database error: " + error);
+  stopCrawl();
+});
+db.once('open', () => {
+  logger.init('Connected to database: ' + db.db.databaseName);
+});
+
 const webSchema = new mongoose.Schema({
   url: {
     type: String,
@@ -21,7 +33,7 @@ webSchema.index({
   "title": "text"
 });
 
-const model = mongoose.connection.model('Web', webSchema, 'web_pages');
+const model = db.model('Web', webSchema, 'web_pages');
 model.createIndexes();
 
 const getPage = async (url, title, content) => {

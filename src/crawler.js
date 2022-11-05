@@ -175,6 +175,7 @@ async function handleData(url, title, content) {
   if (!url && !title && !content) {
     return;
   }
+
   // fs.appendFile('./data.txt', url + '\n' + title + '\n' + content, (err) => {
   //   if (err) throw err;
   //   logger.log('Page content was appended to file!');

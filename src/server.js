@@ -1,26 +1,20 @@
 const crawl = require('./crawler');
 const { stopCrawl } = require('./crawler');
-const mongoose = require('mongoose');
 const logger = require('./utils/logger');
+const mongoose = require('mongoose');
 
 require('dotenv').config();
 
-mongoose.createConnection(process.env.DB_URL_WEBDATA, { useNewUrlParser: true });
-mongoose.createConnection(process.env.DB_URL_URLQUEUE, { useNewUrlParser: true });
-// mongoose.connect(process.env.DB_URL_WEBDATA, { useNewUrlParser: true });
-// mongoose.connect(process.env.DB_URL_URLQUEUE, { useNewUrlParser: true });
-const db = mongoose.connections[0];
-const queuedb = mongoose.connections[1];
+const db = mongoose.createConnection(process.env.DB_URL_WEBDATA, { useNewUrlParser: true });
 
 db.on('error', (error) => {
   logger.log("database error: " + error);
   stopCrawl();
 });
 db.once('open', () => {
-  logger.init('Connected to database: ' + db.db.databaseName);
+  // logger.init('Connected to database: ' + db.db.databaseName);
 
   const stat = db.db.stats({ freeStorage: 1 });
-
   if (stat.totalFreeStorageSize < 10) {
     stopCrawl();
   }
@@ -30,15 +24,10 @@ db.once('open', () => {
     startServer();
   } catch (error) {
     logger.log(error);
-  } finally {
-    stopCrawl();
   }
-
-});
-
-queuedb.on('error', (error) => {
-  logger.log("database error: " + error);
-  stopCrawl();
+  // finally {
+  //   stopCrawl();
+  // }
 });
 
 const urlList = [
