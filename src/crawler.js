@@ -3,6 +3,7 @@ const { insertPage } = require('./models/web');
 const queueDB = require('./models/queue');
 const logger = require('./utils/logger');
 const fileUtil = require('./utils/fileUtil');
+const processor = require('./utils/processor');
 
 const linksQueueFilePath = './linksQueue.txt';
 const linksQueue = [];
@@ -65,9 +66,17 @@ async function crawl(...urls) {
 
     const pageUrl = page.url();
     const title = await page.title();
-    const content = await page.$eval('*', (el) => el.innerText);
+    // const content = await page.$eval('*', (el) => el.innerText);
+    const content = await page.$eval('*', (el) => {
+      const selection = window.getSelection();
+      const range = document.createRange();
+      range.selectNode(el);
+      selection.removeAllRanges();
+      selection.addRange(range);
+      return window.getSelection().toString();
+    });
 
-    await handleData(pageUrl, title, content);
+    await handleData(pageUrl, title, processor.preProcess(content));
     numberOfPagesCrawled++;
     logger.log("Number of pages crawled: ", numberOfPagesCrawled);
 
@@ -220,4 +229,4 @@ function isValidUrl(urlString) {
 }
 
 module.exports = crawlGlobally;
-exports.stopCrawl = stopCrawl;
+module.exports.stopCrawl = stopCrawl;

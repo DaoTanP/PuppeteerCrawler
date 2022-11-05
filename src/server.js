@@ -5,23 +5,38 @@ const logger = require('./utils/logger');
 
 require('dotenv').config();
 
-mongoose.connect(process.env.DB_URL, { useNewUrlParser: true });
-const db = mongoose.connection;
-db.on('error', (error) => logger.log(error));
+mongoose.connect(process.env.DB_URL_webData, { useNewUrlParser: true });
+mongoose.connect(process.env.DB_URL_urlQueue, { useNewUrlParser: true });
+const db = mongoose.connections[0];
+const queuedb = mongoose.connections[0];
+
+db.on('error', (error) => {
+  logger.log("database error: " + error);
+  stopCrawl();
+});
 db.once('open', () => {
   logger.init('Connected to database: ' + db.db.databaseName);
+
+  const stat = db.db.stats({ freeStorage: 1 });
+
+  if (stat.totalFreeStorageSize < 10) {
+    stopCrawl();
+  }
+
   try {
     crawl(...urlList);
     startServer();
   } catch (error) {
     logger.log(error);
+  } finally {
+    stopCrawl();
   }
 
-  db.db.stats(function (err, stats) {
-    if (stats.storageSize / 1048576 > 500) {
-      stopCrawl();
-    }
-  });
+});
+
+queuedb.on('error', (error) => {
+  logger.log("database error: " + error);
+  stopCrawl();
 });
 
 const urlList = [

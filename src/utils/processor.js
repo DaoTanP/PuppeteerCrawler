@@ -9,13 +9,17 @@ function lowercase(string) {
 function tokenize(string) {
     return string.split(" ").filter(element => {
         return element !== '';
-      });
+    });
 }
 
 function preProcess(string) {
     let processed = removeNewlines(string);
     processed = lowercase(processed);
-    processed = tokenize(processed);
-    
+    // processed = tokenize(processed);
+
     return processed;
 }
+
+module.exports = {
+    preProcess
+};

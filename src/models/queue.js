@@ -8,7 +8,7 @@ const queueSchema = new mongoose.Schema({
     },
 })
 
-const model = mongoose.model('Queue', queueSchema, 'queue');
+const model = mongoose.connections[1].model('Queue', queueSchema, 'queue');
 
 const popQueue = async () => {
     const element = await model.findOne();

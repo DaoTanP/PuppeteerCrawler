@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const {Web} = require('../models/web');
+const { Web } = require('../models/web');
 
 router.route('/')
   .get(async (req, res) => {
@@ -21,35 +21,49 @@ router.route('/')
   });
 
 router.route('/test')
-.get(async (req, res) => {
-  try {
-        let result = await Web.aggregate([
-            {
-                "$search": {
-                    "text": {
-                        "query": `${req.query.term}`,
-                        "path": ["title", "content"],
-                        "fuzzy": {
-                            "maxEdits": 2
-                        }
-                    },
-                    "highlight": {
-                        "path": "content"
-                    }
-                }
+  .get(async (req, res) => {
+    try {
+      let result = await Web.aggregate([
+        {
+          "$search": {
+            "text": {
+              "query": `${req.query.term}`,
+              "path": ["title", "content"],
+              "fuzzy": {
+                "maxEdits": 2
+              }
             },
-            {
-                "$addFields": {
-                    "highlights": {
-                        "$meta": "searchHighlights"
-                    }
-                }
+            "highlight": {
+              "path": "content"
             }
-        ]);
-        res.json(result);
+          }
+        },
+        {
+          "$addFields": {
+            "highlights": {
+              "$meta": "searchHighlights"
+            },
+            "textScore": {
+              "$meta": "textScore"
+            }
+          }
+        },
+        {
+          "$sort": {
+            "score": {
+              "$meta": "textScore"
+            }
+          }
+        },
+        {
+          "$limit": 100
+        }
+      ]);
+
+      res.send(result);
     } catch (e) {
-        res.status(500).send({ message: e.message });
+      res.status(500).send({ message: e.message });
     }
-})
+  })
 
 module.exports = router;

@@ -21,7 +21,7 @@ webSchema.index({
   "title": "text"
 });
 
-const model = mongoose.model('Web', webSchema, 'web_pages');
+const model = mongoose.connection.model('Web', webSchema, 'web_pages');
 model.createIndexes();
 
 const getPage = async (url, title, content) => {
