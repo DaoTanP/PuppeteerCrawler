@@ -20,7 +20,7 @@ router.route('/')
     }
   });
 
-router.route('/test')
+router.route('/search')
   .get(async (req, res) => {
     try {
       let result = await Web.aggregate([

@@ -5,8 +5,8 @@ const logger = require('./utils/logger');
 
 require('dotenv').config();
 
-mongoose.connect(process.env.DB_URL_webData, { useNewUrlParser: true });
-mongoose.connect(process.env.DB_URL_urlQueue, { useNewUrlParser: true });
+mongoose.connect(process.env.DB_URL_WEBDATA, { useNewUrlParser: true });
+mongoose.connect(process.env.DB_URL_URLQUEUE, { useNewUrlParser: true });
 const db = mongoose.connections[0];
 const queuedb = mongoose.connections[0];
 
