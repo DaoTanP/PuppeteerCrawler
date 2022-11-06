@@ -12,7 +12,7 @@ router.route('/')
         { score: { $meta: "textScore" } }
       ).sort(
         { score: { $meta: "textScore" } }
-      ).lean();
+      ).limit(50).lean();
 
       res.json(results);
     } catch (err) {
