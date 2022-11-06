@@ -8,7 +8,8 @@ router.route('/')
       const term = req.query.term;
 
       const results = await Web.find(
-        { $text: { $search: term } },
+        // { $text: { $search: term } },
+        { "content": term },
         { score: { $meta: "textScore" } }
       ).sort(
         { score: { $meta: "textScore" } }

@@ -34,7 +34,7 @@ webSchema.index({
 });
 
 const model = db.model('Web', webSchema, 'web_pages');
-model.createIndexes();
+// model.createIndexes();
 
 const getPage = async (url, title, content) => {
   if (!url || !title || !content)
