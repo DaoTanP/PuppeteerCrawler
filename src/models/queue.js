@@ -3,7 +3,7 @@ const logger = require('../utils/logger');
 
 require('dotenv').config();
 
-const queuedb = mongoose.createConnection(process.env.DB_URL_URLQUEUE, { useNewUrlParser: true });
+const db = mongoose.createConnection(process.env.DB_URL_URLQUEUE, { useNewUrlParser: true });
 
 const queueSchema = new mongoose.Schema({
     url: {
@@ -12,15 +12,15 @@ const queueSchema = new mongoose.Schema({
     },
 });
 
-queuedb.on('error', (error) => {
+db.on('error', (error) => {
     logger.log("database error: " + error);
 });
 
-queuedb.once('open', () => {
-    logger.init('Connected to database: ' + queuedb.db.databaseName);
+db.once('open', () => {
+    logger.init('Connected to database: ' + db.db.databaseName);
 });
 
-const model = queuedb.model('Queue', queueSchema, 'url_queue');
+const model = db.model('Queue', queueSchema, 'url_queue');
 
 const popQueue = async () => {
     const element = await model.findOne();
@@ -35,6 +35,12 @@ const popQueue = async () => {
 
 const pushQueue = async (url) => {
     if (!url)
+        return;
+
+    const stats = await db.collections.url_queue.stats({ freeStorage: 1 })
+        .then(stats => { return stats });
+
+    if (stats.totalSize / 1048576 > 510)
         return;
 
     const element = new model({
