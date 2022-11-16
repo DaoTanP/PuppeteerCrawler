@@ -11,7 +11,6 @@ const queueSchema = new mongoose.Schema({
         required: true
     },
 });
-queueSchema.index({ url: 1 }, { unique: true });
 
 db.on('error', (error) => {
     logger.log("database error: " + error);
@@ -36,6 +35,9 @@ const popQueue = async () => {
 
 const pushQueue = async (url) => {
     if (!url)
+        return;
+
+    if (find(url))
         return;
 
     const stats = await db.collections.url_queue.stats({ freeStorage: 1, scale: 1048576 })
@@ -63,6 +65,14 @@ const getQueue = async () => {
         return undefined;
 
     return queue;
+}
+
+const find = async (url) => {
+    const element = await model.find({ url: url });
+    if (!element)
+        return undefined;
+
+    return element.url;
 }
 
 module.exports = {
