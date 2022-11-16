@@ -1,19 +1,6 @@
 const crawl = require('./crawler');
 const { stopCrawl } = require('./crawler');
 const logger = require('./utils/logger');
-const mongoose = require('mongoose');
-
-require('dotenv').config();
-
-const db = mongoose.createConnection(process.env.DB_URL_WEBDATA, { useNewUrlParser: true });
-
-db.on('error', (error) => {
-  logger.log("database error: " + error);
-  stopCrawl();
-});
-
-crawl(...urlList);
-startServer();
 
 const urlList = [
   'https://en.wikipedia.org/wiki/Wikipedia:Popular_pages',
@@ -22,6 +9,9 @@ const urlList = [
   // 'https://www.wikihow.com/Special:Sitemap',
   // 'https://myanimelist.net/about/sitemap',
 ];
+
+crawl(...urlList);
+startServer();
 
 function startServer() {
   const express = require('express');
