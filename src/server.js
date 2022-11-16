@@ -11,14 +11,9 @@ db.on('error', (error) => {
   logger.log("database error: " + error);
   stopCrawl();
 });
-db.once('open', () => {
-  try {
-    crawl(...urlList);
-    startServer();
-  } catch (error) {
-    logger.log(error);
-  }
-});
+
+crawl(...urlList);
+startServer();
 
 const urlList = [
   'https://en.wikipedia.org/wiki/Wikipedia:Popular_pages',
