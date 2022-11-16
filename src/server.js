@@ -24,9 +24,8 @@ const urlList = [
   'https://en.wikipedia.org/wiki/Wikipedia:Popular_pages',
   'https://en.wikipedia.org/wiki/Category:Lists_of_popular_pages_by_WikiProject',
   'https://en.wikipedia.org/wiki/Lists_of_websites',
-  'https://www.wikihow.com/Special:Sitemap',
-  'https://community.fandom.com/wiki/Special:AllPages',
-  'https://myanimelist.net/about/sitemap',
+  // 'https://www.wikihow.com/Special:Sitemap',
+  // 'https://myanimelist.net/about/sitemap',
 ];
 
 function startServer() {
