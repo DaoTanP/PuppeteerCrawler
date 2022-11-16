@@ -37,7 +37,8 @@ const pushQueue = async (url) => {
     if (!url)
         return;
 
-    if (find(url))
+    const checking = await find(url);
+    if (checking)
         return;
 
     const stats = await db.collections.url_queue.stats({ freeStorage: 1, scale: 1048576 })
