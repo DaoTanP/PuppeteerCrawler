@@ -11,6 +11,7 @@ const queueSchema = new mongoose.Schema({
         required: true
     },
 });
+queueSchema.index({ url: 1 }, { unique: true });
 
 db.on('error', (error) => {
     logger.log("database error: " + error);
