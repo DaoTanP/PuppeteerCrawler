@@ -74,10 +74,10 @@ const insertPage = async (url, title, content) => {
   if (!url || !title || !content)
     return;
 
-  const stats = await db.collections.web_pages.stats({ freeStorage: 1 })
+  const stats = await db.collections.web_pages.stats({ freeStorage: 1, scale: 1048576 })
     .then(stats => { return stats });
 
-  if (stats.totalSize / 1048576 > 510)
+  if (stats.totalSize > 510)
     return;
 
   const p = await updatePage(url, title, content);

@@ -37,10 +37,10 @@ const pushQueue = async (url) => {
     if (!url)
         return;
 
-    const stats = await db.collections.url_queue.stats({ freeStorage: 1 })
+    const stats = await db.collections.url_queue.stats({ freeStorage: 1, scale: 1048576 })
         .then(stats => { return stats });
 
-    if (stats.totalSize / 1048576 > 510)
+    if (stats.totalSize > 510)
         return;
 
     const element = new model({
