@@ -146,7 +146,10 @@ async function crawlGlobally(...urls) {
     });
 
     // pageUrls.forEach((url) => pushQueue(url));
-    pageUrls.forEach(async (url) => await queueDB.pushQueue(url));
+    pageUrls.forEach(async (url) => {
+      if (isValidUrl(url))
+        await queueDB.pushQueue(url);
+    });
 
     // fileUtil.writeFile(linksQueueFilePath, ...linksQueue);
     global.gc();

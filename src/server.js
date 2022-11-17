@@ -14,7 +14,7 @@ db.on('error', (error) => {
 
 db.once('open', () => {
   try {
-    crawl(...urlList);
+    // crawl(...urlList);
     startServer();
   } catch (error) {
     throw error;
