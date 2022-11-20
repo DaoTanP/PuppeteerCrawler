@@ -1,5 +1,5 @@
 function removeNewlines(string) {
-    return string.replace(/[\n\r\t\s{2,}]/g, " ");
+    return string.replace(/\s/g, " ");
 }
 
 function lowercase(string) {

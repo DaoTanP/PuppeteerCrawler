@@ -76,7 +76,7 @@ async function crawl(...urls) {
       return window.getSelection().toString();
     });
 
-    await handleData(pageUrl, title, processor.preProcess(content));
+    await handleData(pageUrl, title, content);
     numberOfPagesCrawled++;
     logger.log("Number of pages crawled: ", numberOfPagesCrawled);
 
@@ -179,12 +179,14 @@ async function handleData(url, title, content) {
     return;
   }
 
-  // fs.appendFile('./data.txt', url + '\n' + title + '\n' + content, (err) => {
+  const processedContent = processor.preProcess(content);
+
+  // fs.appendFile('./data.txt', url + '\n' + title + '\n' + processedContent, (err) => {
   //   if (err) throw err;
   //   logger.log('Page content was appended to file!');
   // });
 
-  await insertPage(url, title, content);
+  await insertPage(url, title, processedContent);
 }
 
 function stopCrawl() {
