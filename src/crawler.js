@@ -13,87 +13,6 @@ let numberOfPagesCrawled = 0;
 let stopCrawling = false;
 
 async function crawl(...urls) {
-  const linksQueue = [];
-
-  const pushQueue = (link) => {
-    if (seenLinksQueue.indexOf(link) != -1 || !isValidUrl(link))
-      return;
-
-    linksQueue.push(link);
-  }
-
-  const popQueue = () => {
-    if (linksQueue.length === 0)
-      return undefined;
-
-    const link = linksQueue.shift();
-    // seenLinksQueue.push(link);
-    return link;
-  }
-
-  for (let url of urls) {
-    pushQueue(url);
-  }
-
-  const browser = await puppeteer.launch({
-    headless: true,
-    args: ['--no-sandbox']
-  });
-
-  const page = await browser.newPage();
-  page.setDefaultNavigationTimeout(0);
-  // const page = (await browser.pages())[0];
-
-  while (!stopCrawling && linksQueue.length !== 0) {
-    let url = popQueue();
-
-    await Promise.all([
-      page.waitForNavigation({ waitUntil: 'networkidle2' }),
-      page.goto(url, { timeout: 0, waitUntil: 'load' }),
-      // page.waitForSelector('body'),
-    ]);
-
-    await waitTillHTMLRendered(page);
-
-    //remove ads
-    // await page.evaluate((sel) => {
-    //   let elements = document.querySelectorAll(sel);
-    //   for (let i = 0; i < elements.length; i++) {
-    //     elements[i].parentNode.removeChild(elements[i]);
-    //   }
-    // }, "iframe");
-    // await page.$$eval("iframe", els => els.forEach(el => el.remove()));
-
-    const pageUrl = page.url();
-    const title = await page.title();
-    // const content = await page.$eval('*', (el) => el.innerText);
-    const content = await page.$eval('*', (el) => {
-      const selection = window.getSelection();
-      const range = document.createRange();
-      range.selectNode(el);
-      selection.removeAllRanges();
-      selection.addRange(range);
-      return window.getSelection().toString();
-    });
-
-    await handleData(pageUrl, title, content);
-    numberOfPagesCrawled++;
-    logger.log("Number of pages crawled: ", numberOfPagesCrawled);
-
-    const pageUrls = await page.evaluate(() => {
-      const urlArray = Array.from(document.links).map((link) => link.href);
-      const uniqueUrlArray = [...new Set(urlArray)];
-      return uniqueUrlArray;
-    });
-
-    pageUrls.forEach((url) => pushQueue(url));
-    global.gc();
-  }
-
-  await browser.close();
-};
-
-async function crawlGlobally(...urls) {
   // const Queue = fileUtil.readFile(linksQueueFilePath);
   // Queue?.split('\n').forEach((link) => pushQueue(link));
 
@@ -131,9 +50,18 @@ async function crawlGlobally(...urls) {
     //   }
     // }, "iframe");
 
-    const pageUrl = page.url();
+    // const pageUrl = page.url();
+    const pageUrl = await page.$eval('link[rel=canonical]', (el) => el.href) || page.url();
     const title = await page.title();
-    const content = await page.$eval('*', (el) => el.innerText);
+    // const content = await page.$eval('*', (el) => el.innerText);
+    const content = await page.$eval('*', (el) => {
+      const selection = window.getSelection();
+      const range = document.createRange();
+      range.selectNode(el);
+      selection.removeAllRanges();
+      selection.addRange(range);
+      return window.getSelection().toString();
+    });
 
     await handleData(pageUrl, title, content);
     numberOfPagesCrawled++;
@@ -234,5 +162,5 @@ function isValidUrl(urlString) {
   return !!urlPattern.test(urlString);
 }
 
-module.exports = crawlGlobally;
+module.exports = crawl;
 module.exports.stopCrawl = stopCrawl;
