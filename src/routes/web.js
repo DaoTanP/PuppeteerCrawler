@@ -26,40 +26,48 @@ router.route('/search')
     try {
       let result = await Web.aggregate([
         {
-          "$search": {
-            "text": {
-              "query": `${req.query.term}`,
-              "path": ["title", "content"],
-              "fuzzy": {
-                "maxEdits": 2
-              }
-            },
-            "highlight": {
-              "path": "content"
+          $match: {
+            $text: {
+              $search: `${req.query.term}`
+            }
+          }
+        },
+        // {
+        //   $search: {
+        //     index: 'content_text_title_text',
+        //     text: {
+        //       query: `${req.query.term}`,
+        //       path: ["title", "content"],
+        //       // fuzzy: {
+        //       //   maxEdits: 2
+        //       // }
+        //     },
+        //     // highlight: {
+        //     //   path: "content"
+        //     // }
+        //   }
+        // },
+        // {
+        //   $addFields: {
+        //     highlights: {
+        //       $meta: "searchHighlights"
+        //     },
+        //     textScore: {
+        //       $meta: "textScore"
+        //     }
+        //   }
+        // },
+        {
+          $sort: {
+            score: {
+              $meta: "textScore"
             }
           }
         },
         {
-          "$addFields": {
-            "highlights": {
-              "$meta": "searchHighlights"
-            },
-            "textScore": {
-              "$meta": "textScore"
-            }
-          }
-        },
-        {
-          "$sort": {
-            "score": {
-              "$meta": "textScore"
-            }
-          }
-        },
-        {
-          "$limit": 100
+          $limit: 100
         }
-      ]);
+      ]).exec();
 
       res.send(result);
     } catch (e) {

@@ -69,8 +69,8 @@ const getQueue = async () => {
 }
 
 const find = async (url) => {
-    const element = await model.find({ "url": url }).lean();
-    if (!element.url)
+    const element = await model.findOne({ "url": url });
+    if (!element || !element.url)
         return undefined;
 
     return element.url;
