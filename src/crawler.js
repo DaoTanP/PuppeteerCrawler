@@ -51,7 +51,8 @@ async function crawl(...urls) {
     // }, "iframe");
 
     // const pageUrl = page.url();
-    const pageUrl = (await page.$eval('link[rel=canonical]', (el) => el.href)) || page.url();
+    const canonical = await page.$('link[rel=canonical]')?.href;
+    const pageUrl = canonical || page.url();
     const title = await page.title();
     // const content = await page.$eval('*', (el) => el.innerText);
     const content = await page.$eval('*', (el) => {
