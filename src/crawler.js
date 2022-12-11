@@ -2,47 +2,47 @@ const puppeteer = require('puppeteer');
 const { insertPage } = require('./models/web');
 const queueDB = require('./models/queue');
 const logger = require('./utils/logger');
-const fileUtil = require('./utils/fileUtil');
 const processor = require('./utils/processor');
 
-const linksQueueFilePath = './linksQueue.txt';
-const linksQueue = [];
-const seenLinksQueue = [];
 let numberOfPagesCrawled = 0;
-
 let stopCrawling = false;
+const stopCrawl = () => { stopCrawling = true; }
 
 async function crawl(...urls) {
-  // const Queue = fileUtil.readFile(linksQueueFilePath);
-  // Queue?.split('\n').forEach((link) => pushQueue(link));
-
+  // Đẩy link vào hàng đợi
   for (let url of urls) {
     await queueDB.pushQueue(url);
   }
 
+  // Mở trình duyệt
   const browser = await puppeteer.launch({
     headless: true,
     args: ['--no-sandbox', '--disable-setuid-sandbox']
   });
 
+  // Khởi tạo tab trong trình duyệt
   const page = await browser.newPage();
   page.setDefaultNavigationTimeout(0);
   // const page = (await browser.pages())[0];
 
+  // Bắt đầu quá trình crawl
   while (!stopCrawling) {
+    // Lấy link từ hàng đợi
     let url = await queueDB.popQueue();
     if (url === undefined)
       break;
 
+    // Mở url trong tab đã khởi tạo
     await Promise.all([
       page.waitForNavigation({ waitUntil: 'networkidle2' }),
       page.goto(url, { timeout: 0, waitUntil: 'load' }),
       // page.waitForSelector('body'),
     ]);
 
+    // Chờ trang web tải xong
     await waitTillHTMLRendered(page);
 
-    //remove ads
+    // Xóa quảng cáo
     // await page.evaluate((sel) => {
     //   let elements = document.querySelectorAll(sel);
     //   for (let i = 0; i < elements.length; i++) {
@@ -50,7 +50,7 @@ async function crawl(...urls) {
     //   }
     // }, "iframe");
 
-    // const pageUrl = page.url();
+    // Lấy dữ liệu từ trang web (đường link, tên trang, nội dung trang)
     const canonical = await page.$('link[rel=canonical]')?.href;
     const pageUrl = canonical || page.url();
     const title = await page.title();
@@ -64,44 +64,29 @@ async function crawl(...urls) {
       return window.getSelection().toString();
     });
 
+    // Đưa dữ liệu đã crawl vào database
     await handleData(pageUrl, title, content);
     numberOfPagesCrawled++;
     logger.log("Number of pages crawled: ", numberOfPagesCrawled);
 
+    // Lấy các link từ trang web đang truy cập
     const pageUrls = await page.evaluate(() => {
       const urlArray = Array.from(document.links).map((link) => link.href);
       const uniqueUrlArray = [...new Set(urlArray)];
       return uniqueUrlArray;
     });
 
-    // pageUrls.forEach((url) => pushQueue(url));
+    // Đưa các link vào hàng đợi
     pageUrls.forEach(async (url) => {
       if (isValidUrl(url))
         await queueDB.pushQueue(url);
     });
 
-    // fileUtil.writeFile(linksQueueFilePath, ...linksQueue);
     global.gc();
   }
 
   await browser.close();
 };
-
-function pushQueue(link) {
-  if (seenLinksQueue.indexOf(link) != -1 || !isValidUrl(link))
-    return;
-
-  linksQueue.push(link);
-}
-
-function popQueue() {
-  if (linksQueue.length === 0)
-    return undefined;
-
-  const link = linksQueue.shift();
-  // seenLinksQueue.push(link);
-  return link;
-}
 
 async function handleData(url, title, content) {
   if (!url && !title && !content) {
@@ -110,16 +95,7 @@ async function handleData(url, title, content) {
 
   const processedContent = processor.preProcess(content);
 
-  // fs.appendFile('./data.txt', url + '\n' + title + '\n' + processedContent, (err) => {
-  //   if (err) throw err;
-  //   logger.log('Page content was appended to file!');
-  // });
-
   await insertPage(url, title, processedContent);
-}
-
-function stopCrawl() {
-  stopCrawling = true;
 }
 
 async function waitTillHTMLRendered(page, timeout = 30000) {
